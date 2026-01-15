@@ -7,9 +7,20 @@ class Controller:
         self._view = view
         self._model = model
 
-    def handle_crea_grafo(self, e):
-        """ Handler per gestire creazione del grafo """""
-        # TODO
+    def handle_grafo(self, e):
+        """Callback per il pulsante 'Crea Grafo'."""
+        try:
+            durata = int(self._view.txt_durata.value)
+        except:
+            self._view.show_alert("Inserisci un numero valido.")
+            return
+
+
+        self._model.build_graph(durata)
+        self._view.lista_visualizzazione_1.controls.append(
+            ft.Text(f"Grafo creato: {self._model.G.number_of_nodes()} nodi, {self._model.G.number_of_edges()} archi")
+        )
+
 
     def get_selected_album(self, e):
         """ Handler per gestire la selezione dell'album dal dropdown """""
