@@ -7,6 +7,7 @@ class Controller:
         self._view = view
         self._model = model
 
+
     def handle_grafo(self, e):
         """Callback per il pulsante 'Crea Grafo'."""
         try:

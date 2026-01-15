@@ -1,6 +1,7 @@
 from database.DB_connect import DBConnect
 from model.album import Album
 from model.track import Track
+from model.playlist import Playlist
 
 class DAO:
 
@@ -18,7 +19,7 @@ class DAO:
 
     @staticmethod
 
-    def readAlbum():
+    def readAlbum(durata):
 
         conn = DBConnect.get_connection()
 
@@ -29,17 +30,24 @@ class DAO:
 
 
         query = """
-            SELECT *
-            FROM album
+           SELECT 
+        t.album_id,
+        a.title,
+        SUM(t.milliseconds) / (1000 * 60) AS minuti_totali
+        FROM track t, album a 
+        where a.id = t.album_id 
+        GROUP BY t.album_id
+        HAVING minuti_totali > %s;
+
         """
 
 
 
-        cursor.execute(query)
+        cursor.execute(query, (durata,))
 
         for row in cursor:
 
-            result.append(Album(row['id'], row['title'], row["artist_id"]))
+            result.append(Album(row['album_id'], row['title'], row["minuti_totali"]))
 
 
 
@@ -105,6 +113,39 @@ class DAO:
         for row in cursor:
 
             result.append(Track(row['id'], row['album_id'], row["minuti"]))
+
+
+
+        cursor.close()
+
+        conn.close()
+
+        return result
+
+    @staticmethod
+
+    def readPlaylist():
+
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+
+
+
+        query = """
+            SELECT *
+            FROM playlist
+        """
+
+
+
+        cursor.execute(query)
+
+        for row in cursor:
+
+            result.append(Playlist(row['playlist_id'], row['track_id']))
 
 
 

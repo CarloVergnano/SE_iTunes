@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 @dataclass
 class Album:
-    id: int
+    album_id: int
     title: str
-    artist_id: int
+    minuti_totali: float
 
     def __str__(self):
-        return f"{self.id} {self.title} {self.artist_id}  "
+        return f"{self.album_id} {self.title} {self.minuti_totali}  "
 
     #Serve per portare l'oggetto come nodo del grafo
     def __hash__(self):
-        return hash(self.id)
+        return hash(self.album_id)
