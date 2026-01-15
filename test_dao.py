@@ -1,3 +1,3 @@
 from database.dao import DAO
-result = DAO.read_playlist_track()
+result = DAO.readAlbum(120)
 print(result)

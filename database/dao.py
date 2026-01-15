@@ -1,6 +1,6 @@
 from database.DB_connect import DBConnect
 from model.album import Album
-from model.track import Track
+from model.connalbum import ConnAlbum
 from model.playlist import Playlist
 
 class DAO:
@@ -58,39 +58,8 @@ class DAO:
         return result
 
     @staticmethod
-    def read_playlist_track() -> list | None:
-        cnx = DBConnect.get_connection()
-        result = []
-        if cnx is None:
-            print("❌ Errore di connessione al database.")
-            return None
 
-        cursor = cnx.cursor(dictionary=True)
-        query = """ SELECT *
-                    FROM playlist_track pt 
-                        """  #
-        try:
-            cursor.execute(query)
-            for row in cursor:
-                result.append({
-                    "track_id": row["track_id"],
-                    "playlist_id": row["playlist_id"]
-                })
-
-        except Exception as e:
-            print(f"Errore durante la query: {e}")
-            result = None
-        finally:
-            cursor.close()
-            cnx.close()
-
-        return result
-
-
-
-    @staticmethod
-
-    def readTrack():
+    def readConnAlbum():
 
         conn = DBConnect.get_connection()
 
@@ -101,8 +70,12 @@ class DAO:
 
 
         query = """
-            SELECT id, album_id , (milliseconds/(1000*60)) as minuti
-            FROM track
+            SELECT DISTINCT
+                    t1.album_id AS album1,
+                    t2.album_id AS album2
+                    FROM playlist_track pt1, playlist_track pt2, track t1, track t2
+                    where pt1.playlist_id = pt2.playlist_id AND pt1.track_id = t1.id and pt2.track_id = t2.id 
+                    and t1.album_id <> t2.album_id 
 
         """
 
@@ -112,7 +85,7 @@ class DAO:
 
         for row in cursor:
 
-            result.append(Track(row['id'], row['album_id'], row["minuti"]))
+            result.append(ConnAlbum( row['album1'], row["album2"]))
 
 
 
