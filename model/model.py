@@ -20,14 +20,12 @@ class Model:
         self._album_dict = {a.album_id: a for a in self._album_list}
 
         for c in self._connessioni:
-            if c.album1 in self._album_dict and c.album2 in self._album_dict:
                 self.G.add_edge(c.album1, c.album2)
 
         return self.G
 
     @staticmethod
     def load_album(durata: int):
-        print(DAO.readAlbum(durata))
         return DAO.readAlbum(durata)
 
     def analizza_componente(self, album_id):

@@ -29,7 +29,7 @@ class Controller:
         album = self._model.load_album(durata) # Ogni regione (id, nome_regione)
 
         if album:
-            for regione in sorted(album):
+            for regione in album:
                 self._view.dd_album.options.append(ft.dropdown.Option(key=regione.album_id,text=regione.title))
         else:
             self._view.show_alert("Errore nel caricamento degli album.")
