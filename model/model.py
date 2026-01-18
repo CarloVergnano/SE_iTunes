@@ -17,3 +17,11 @@ class Model:
         for c in self.connessione:
             self.G.add_edge(c.album1, c.album2)
         return self.G
+
+    def get_component(self, album):
+        """Restituisce la componente connessa di un album"""
+        componente = list(nx.node_connected_component(self.G, int(album)))
+
+        # componente.remove(int(album))
+
+        return componente
