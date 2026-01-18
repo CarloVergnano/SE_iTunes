@@ -1,43 +1,19 @@
 import networkx as nx
 from database.dao import DAO
 
-
 class Model:
     def __init__(self):
-        """Definire le strutture dati utili"""
-        self._album_list = []
-        self.connessioni = []
-        self._album_dict = {}
-        for o in self._album_list:
-            self._album_dict[o.id] = o
         self.G = nx.Graph()
-        # TODO
+        self.album = []
+        self.connessione = []
 
-    def build_graph(self, durata: int):
+    def get_album (self, durata):
+        self.album = DAO.get_album(durata)
+        return self.album
 
-        self._album_list = DAO.readAlbum(durata)
-        self._connessioni = DAO.readConnAlbum()
-        self._album_dict = {a.album_id: a for a in self._album_list}
-
-        for c in self._connessioni:
-                self.G.add_edge(c.album1, c.album2)
-
+    def crea_grafo(self, durata):
+        self.album = DAO.get_album(durata)
+        self.connessione = DAO.get_connessione(durata)
+        for c in self.connessione:
+            self.G.add_edge(c.album1, c.album2)
         return self.G
-
-    @staticmethod
-    def load_album(durata: int):
-        return DAO.readAlbum(durata)
-
-    def analizza_componente(self, album_id):
-
-        componente = nx.node_connected_component(self.G, album_id)
-
-        dimensione = len(componente)
-
-        durata_totale = 0
-        for a in componente:
-            durata_totale += self._album_dict[a].durata
-
-        return dimensione, durata_totale
-
-

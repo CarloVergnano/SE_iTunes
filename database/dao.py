@@ -1,105 +1,79 @@
-from database.DB_connect import DBConnect
+
 from model.album import Album
-from model.connalbum import ConnAlbum
+from database.DB_connect import DBConnect
+from model.connessioni import Connessione
 
 
 class DAO:
-
-    """
-
-        Implementare tutte le funzioni necessarie a interrogare il database.
-
-        """
-
-    def __init__(self):
-
-        pass
-
-
-
     @staticmethod
-
-    def readAlbum(durata):
-
+    def query_esempio():
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-
-
-
-        query = """
-           SELECT 
-        t.album_id,
-        a.title,
-        SUM(t.milliseconds) / (1000 * 60) AS minuti_totali
-        FROM track t, album a 
-        where a.id = t.album_id 
-        GROUP BY t.album_id
-        HAVING minuti_totali > %s;
-
-        """
-
-
-
-        cursor.execute(query, (durata,))
-
-        for row in cursor:
-
-            result.append(Album(row['album_id'], row['title'], row["minuti_totali"]))
-
-
-
-        cursor.close()
-
-        conn.close()
-
-        return result
-
-    @staticmethod
-
-    def readConnAlbum():
-
-        conn = DBConnect.get_connection()
-
-        result = []
-
-        cursor = conn.cursor(dictionary=True)
-
-
-
-        query = """
-            SELECT DISTINCT
-            t1.album_id AS album1,
-            t2.album_id AS album2
-            FROM playlist_track pt1, playlist_track pt2, track t1, track t2
-            where pt1.playlist_id = pt2.playlist_id AND pt1.track_id = t1.id and pt2.track_id = t2.id 
-            and t1.album_id <> t2.album_id and t1.album_id in (SELECT 
-            t.album_id 
-            FROM track t  
-            GROUP BY t.album_id
-            HAVING SUM(t.milliseconds) / (1000 * 60) > 120) and t2.album_id in (SELECT 
-            t.album_id 
-            FROM track t 
-            GROUP BY t.album_id
-            HAVING SUM(t.milliseconds) / (1000 * 60) > 120) and t1.album_id < t2.album_id
-
-        """
-
-
+        query = """ SELECT * FROM esempio """
 
         cursor.execute(query)
 
         for row in cursor:
-
-            result.append(ConnAlbum( row['album1'], row["album2"]))
-
-
+            result.append(row)
 
         cursor.close()
-
         conn.close()
+        return result
 
+    @staticmethod
+    def get_album(durata):
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """ select a.id, a.title, sum(t.milliseconds/(1000*60)) as minuti_tot
+                    from album a , track t 
+                    where a.id = t.album_id
+                    group by t.album_id 
+                    having sum(t.milliseconds) > %s*1000*60 """
+
+        cursor.execute(query, (durata, ))
+
+        for row in cursor:
+            result.append(Album(row["id"], row["title"], row["minuti_tot"]))
+
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
+    def get_connessione(durata):
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """ select distinct t1.album_id  album1, t2.album_id  album2
+                    from playlist_track pt1, playlist_track pt2, track t1, track t2
+                    where pt1.playlist_id = pt2.playlist_id and pt1.track_id <> pt2.track_id 
+                    and pt1.track_id = t1.id and t1.album_id in(
+                    select a.id
+                    from album a , track t 
+                    where a.id = t.album_id
+                    group by t.album_id 
+                    having sum(t.milliseconds) > %s*1000*60)
+                    and pt2.track_id = t2.id and t2.album_id in(
+                    select a.id
+                    from album a , track t 
+                    where a.id = t.album_id
+                    group by t.album_id 
+                    having sum(t.milliseconds) > %s*1000*60) and t1.album_id < t2.album_id  """
+
+        cursor.execute(query, (durata,durata))
+
+        for row in cursor:
+            result.append(Connessione(row["album1"], row["album2"]))
+
+        cursor.close()
+        conn.close()
         return result
 

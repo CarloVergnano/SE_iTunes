@@ -1,3 +1,3 @@
 from database.dao import DAO
-result = DAO.readAlbum(120)
+result = DAO.get_album(120)
 print(result)
